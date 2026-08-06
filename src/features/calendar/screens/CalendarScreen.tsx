@@ -100,7 +100,7 @@ export function CalendarScreen() {
             const date = ev.dateTime.split('T')[0];
             const typeLabel = TYPE_LABELS[ev.type] ?? ev.type;
             return (
-              <Card key={ev.id} style={[styles.taskCard, done && styles.taskCardDone]} padding={14}>
+              <Card key={ev.id} style={[styles.taskCard, done ? styles.taskCardDone : undefined]} padding={14}>
                 <View style={styles.taskRow}>
                   <TouchableOpacity
                     style={[styles.checkbox, done && { backgroundColor: accent, borderColor: accent }]}

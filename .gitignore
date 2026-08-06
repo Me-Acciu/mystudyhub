@@ -10,6 +10,7 @@ yarn-error.log*
 
 # Sicurezza: mai versionare segreti o file locali con credenziali
 .env
+.env.example
 .env*.local
 .env.production
 *.pem
@@ -31,3 +32,4 @@ Thumbs.db
 # Documentazione e file temporanei
 docs/
 *.docx
+.env.example

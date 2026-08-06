@@ -40,8 +40,8 @@ interface AuthContextValue {
   isSubmitting: boolean;
   /** Effettua il login con email e password. Ritorna un messaggio di errore "safe" o null. */
   signIn: (email: string, password: string) => Promise<string | null>;
-  /** Registra un nuovo utente. Ritorna un messaggio di errore "safe" o null. */
-  signUp: (email: string, password: string) => Promise<string | null>;
+  /** Registra un nuovo utente. Ritorna un messaggio di errore "safe" o null. Aggiunto parametro opzionale fullName */
+  signUp: (email: string, password: string, fullName?: string) =>   Promise<string | null>;
   /** Effettua il logout e ripulisce la sessione locale. */
   signOut: () => Promise<void>;
 }
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string): Promise<string | null> => {
+  const signUp = async (email: string, password: string, fullName?: string): Promise<string | null> => {
     if (!isValidEmail(email)) return 'Inserisci un indirizzo email valido.';
     const passwordError = isValidPassword(password);
     if (passwordError) return passwordError;
@@ -111,10 +111,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
+        //  Aggiunti i metadati per il trigger SQL
+        options: {
+          data: {
+            full_name: fullName?.trim() || null,
+          },
+        },
       });
       if (error) {
-        // Anche qui: messaggio generico, per non rivelare se l'email è già
-        // registrata (evita "account enumeration").
         return 'Non è stato possibile completare la registrazione. Riprova più tardi.';
       }
       return null;

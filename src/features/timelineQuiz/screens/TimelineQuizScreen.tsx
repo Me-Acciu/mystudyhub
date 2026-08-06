@@ -17,7 +17,7 @@
  * ---------------------------------------------------------------------------
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -105,7 +105,7 @@ export function TimelineQuizScreen({ route, navigation }: Props) {
   const [completed, setCompleted] = useState(false);
 
   // Stamp animation
-  const stampScale = useRef(new Animated.Value(1)).current;
+  const [stampScale] = useState(() => new Animated.Value(1));
 
   const animateStamp = useCallback(() => {
     stampScale.setValue(0.7);

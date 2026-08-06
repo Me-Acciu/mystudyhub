@@ -4,7 +4,7 @@
  * Schermata di registrazione. Come per il login, nessuna chiamata diretta
  * a Supabase: tutto passa da `useAuth().signUp`.
  * ---------------------------------------------------------------------------
- */
+*/
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
@@ -18,6 +18,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
 export function SignUpScreen({ navigation }: Props) {
   const { signUp, isSubmitting } = useAuth();
+  const [fullName, setFullName] = useState(''); //  Nuovo stato
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,19 +29,23 @@ export function SignUpScreen({ navigation }: Props) {
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    if (!fullName.trim()) {
+      setErrorMessage('Inserisci il tuo nome completo.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setErrorMessage('Le due password inserite non coincidono.');
       return;
     }
 
-    const error = await signUp(email, password);
+    //  Passiamo anche fullName
+    const error = await signUp(email, password, fullName);
     if (error) {
       setErrorMessage(error);
       return;
     }
 
-    // Supabase, di default, richiede conferma email prima del primo login:
-    // informiamo l'utente invece di dare per scontato l'accesso immediato.
     setSuccessMessage('Registrazione avviata! Controlla la tua email per confermare l\'account.');
   };
 
@@ -49,6 +54,19 @@ export function SignUpScreen({ navigation }: Props) {
       <View style={styles.content}>
         <Text style={styles.title}>Crea il tuo account</Text>
         <Text style={styles.subtitle}>Inizia a organizzare il tuo studio</Text>
+
+        {/* Nuovo Campo Nome Completo */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Nome Completo</Text>
+          <TextInput
+            value={fullName}
+            onChangeText={setFullName}
+            placeholder="Mario Rossi"
+            placeholderTextColor="#64748B"
+            autoCapitalize="words"
+            style={styles.input}
+          />
+        </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Email</Text>
@@ -103,6 +121,8 @@ export function SignUpScreen({ navigation }: Props) {
     </KeyboardAvoidingView>
   );
 }
+
+// ... styles rimangono identici
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#0F172A' },

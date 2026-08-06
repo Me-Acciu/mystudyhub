@@ -22,11 +22,9 @@
  * Lancia un errore esplicito in fase di avvio se manca, invece di lasciare
  * che l'app parta "silenziosamente rotta".
  */
-function readRequiredEnv(key: string, fallback?: string): string {
+function readRequiredEnv(value: string | undefined, key: string, fallback?: string): string {
   // In Expo (SDK 49+) le variabili con prefisso EXPO_PUBLIC_ sono già
   // disponibili su process.env sia in dev che in build.
-  const value = process.env[key];
-
   if (!value || value.trim().length === 0) {
     if (fallback !== undefined) {
       return fallback;
@@ -42,7 +40,7 @@ function readRequiredEnv(key: string, fallback?: string): string {
 
 export const env = {
   /** URL pubblico del progetto Supabase (non sensibile in sé). */
-  SUPABASE_URL: readRequiredEnv('EXPO_PUBLIC_SUPABASE_URL', 'https://demo.supabase.co'),
+  SUPABASE_URL: readRequiredEnv(process.env.EXPO_PUBLIC_SUPABASE_URL, 'EXPO_PUBLIC_SUPABASE_URL'),
 
   /**
    * Chiave "anon" pubblica di Supabase.
@@ -51,8 +49,19 @@ export const env = {
    * Non è quindi un segreto "critico", ma va comunque trattata come
    * configurazione e non hardcodata nei sorgenti.
    */
-  SUPABASE_ANON_KEY: readRequiredEnv('EXPO_PUBLIC_SUPABASE_ANON_KEY', 'demo-anon-key'),
+  SUPABASE_ANON_KEY: readRequiredEnv(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY, 'EXPO_PUBLIC_SUPABASE_ANON_KEY'),
 
   /** true negli ambienti di sviluppo, utile per log/feature flag. */
   IS_DEV: typeof __DEV__ !== 'undefined' ? __DEV__ : true,
 } as const;
+
+// Non-sensitive debug helper: log the Supabase host (not the key) in dev to aid debugging.
+if (env.IS_DEV) {
+  try {
+    const supabaseHost = new URL(env.SUPABASE_URL).host;
+    // eslint-disable-next-line no-console
+    console.info(`[env] Supabase host: ${supabaseHost}`);
+  } catch {
+    // ignore malformed URL here; readRequiredEnv already enforces presence
+  }
+}

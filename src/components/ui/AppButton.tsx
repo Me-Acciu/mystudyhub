@@ -9,6 +9,7 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  type StyleProp,
   type ViewStyle,
   type TextStyle,
 } from 'react-native';
@@ -21,8 +22,9 @@ interface AppButtonProps {
   variant?: Variant;
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  isLoading?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   color?: string; // override del colore primario
 }
 
@@ -32,10 +34,12 @@ export function AppButton({
   variant = 'primary',
   disabled = false,
   loading = false,
+  isLoading = false,
   style,
   textStyle,
   color,
 }: AppButtonProps) {
+  const effectiveLoading = loading || isLoading;
   const bg = color ?? '#6366F1'; // indigo default
 
   const containerStyle: ViewStyle = {
@@ -57,11 +61,11 @@ export function AppButton({
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={disabled || loading}
+      disabled={disabled || effectiveLoading}
       style={[containerStyle, style]}
       activeOpacity={0.75}
     >
-      {loading ? (
+      {effectiveLoading ? (
         <ActivityIndicator color={labelColor} size="small" />
       ) : (
         <Text style={[styles.label, { color: labelColor }, textStyle]}>{label}</Text>

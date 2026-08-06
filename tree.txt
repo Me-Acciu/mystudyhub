@@ -1,0 +1,69 @@
+.
+|-- App.tsx
+|-- SKILL.md
+|-- app.json
+|-- assets
+|-- babel.config.js
+|-- package-lock.json
+|-- package.json
+|-- src
+|   |-- components
+|   |   `-- ui
+|   |       |-- AppButton.tsx
+|   |       |-- Button.tsx
+|   |       |-- Card.tsx
+|   |       `-- ScreenWrapper.tsx
+|   |-- config
+|   |   `-- env.ts
+|   |-- features
+|   |   |-- auth
+|   |   |   `-- screens
+|   |   |       |-- LoginScreen.tsx
+|   |   |       `-- SignUpScreen.tsx
+|   |   |-- calendar
+|   |   |   `-- screens
+|   |   |       `-- CalendarScreen.tsx
+|   |   |-- classes
+|   |   |   `-- screens
+|   |   |       `-- ClassBoardScreen.tsx
+|   |   |-- flashcards
+|   |   |   `-- screens
+|   |   |       `-- FlashcardsScreen.tsx
+|   |   |-- home
+|   |   |   `-- screens
+|   |   |       `-- HomeScreen.tsx
+|   |   |-- profile
+|   |   |   `-- screens
+|   |   |       `-- ProfileScreen.tsx
+|   |   |-- subjects
+|   |   |   |-- api
+|   |   |   |   `-- subjectsApi.ts
+|   |   |   |-- hooks
+|   |   |   |   `-- useSubjects.ts
+|   |   |   `-- screens
+|   |   |       |-- ChapterDetailScreen.tsx
+|   |   |       `-- SubjectsScreen.tsx
+|   |   `-- timelineQuiz
+|   |       |-- screens
+|   |       |   `-- TimelineQuizScreen.tsx
+|   |       `-- utils
+|   |-- navigation
+|   |   |-- AuthNavigator.tsx
+|   |   |-- MainTabNavigator.tsx
+|   |   `-- RootNavigator.tsx
+|   |-- services
+|   |   |-- auth
+|   |   |   `-- AuthContext.tsx
+|   |   `-- supabase
+|   |       |-- client.ts
+|   |       `-- secureStorage.ts
+|   |-- store
+|   |   |-- useStudyStore.ts
+|   |   `-- useThemeStore.ts
+|   |-- types
+|   |   `-- models.ts
+|   `-- utils
+|       `-- validation.ts
+`-- tsconfig.json
+
+32 directories, 34 files
