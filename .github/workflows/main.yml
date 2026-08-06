@@ -1,0 +1,38 @@
+name: Generate Repository Map
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-map:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install tree
+      run: sudo apt-get update && sudo apt-get install -y tree
+
+    - name: Generate Tree Map
+      run: |
+        echo "# Repository map" > REPO_MAP.md
+        echo "Last update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> REPO_MAP.txt
+        echo "" >> REPO_MAP.txt
+        echo '```text' >> REPO_MAP.txt
+        tree -I '.git|.github|node_modules|.expo|dist|web-build|ios|android|example|.kotlin' >> REPO_MAP.txt
+        echo '```' >> REPO_MAP.txt
+
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add REPO_MAP.md
+        git diff-index --quiet HEAD || git commit -m "docs: repository map updated [skip ci]"
+        git push
