@@ -22,12 +22,15 @@
  * Lancia un errore esplicito in fase di avvio se manca, invece di lasciare
  * che l'app parta "silenziosamente rotta".
  */
-function readRequiredEnv(key: string): string {
+function readRequiredEnv(key: string, fallback?: string): string {
   // In Expo (SDK 49+) le variabili con prefisso EXPO_PUBLIC_ sono già
   // disponibili su process.env sia in dev che in build.
   const value = process.env[key];
 
   if (!value || value.trim().length === 0) {
+    if (fallback !== undefined) {
+      return fallback;
+    }
     throw new Error(
       `[env] Variabile d'ambiente mancante: "${key}". ` +
         'Controlla il tuo file .env (vedi .env.example) e riavvia Expo con la cache pulita ("expo start -c").'
@@ -39,7 +42,7 @@ function readRequiredEnv(key: string): string {
 
 export const env = {
   /** URL pubblico del progetto Supabase (non sensibile in sé). */
-  SUPABASE_URL: readRequiredEnv('EXPO_PUBLIC_SUPABASE_URL'),
+  SUPABASE_URL: readRequiredEnv('EXPO_PUBLIC_SUPABASE_URL', 'https://demo.supabase.co'),
 
   /**
    * Chiave "anon" pubblica di Supabase.
@@ -48,8 +51,8 @@ export const env = {
    * Non è quindi un segreto "critico", ma va comunque trattata come
    * configurazione e non hardcodata nei sorgenti.
    */
-  SUPABASE_ANON_KEY: readRequiredEnv('EXPO_PUBLIC_SUPABASE_ANON_KEY'),
+  SUPABASE_ANON_KEY: readRequiredEnv('EXPO_PUBLIC_SUPABASE_ANON_KEY', 'demo-anon-key'),
 
   /** true negli ambienti di sviluppo, utile per log/feature flag. */
-  IS_DEV: __DEV__,
+  IS_DEV: typeof __DEV__ !== 'undefined' ? __DEV__ : true,
 } as const;
