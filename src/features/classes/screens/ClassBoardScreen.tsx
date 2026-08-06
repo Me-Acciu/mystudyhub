@@ -106,8 +106,9 @@ export function ClassBoardScreen() {
                   key={tile}
                   style={[
                     styles.tile,
-                    isUserHere && [styles.tileUser, { borderColor: accent }],
-                    isMilestone && !isUserHere && styles.tileMilestone,
+                    isUserHere ? styles.tileUser : undefined,
+                    isUserHere ? { borderColor: accent } : undefined,
+                    !isUserHere && isMilestone ? styles.tileMilestone : undefined,
                   ]}
                 >
                   <Text style={styles.tileNum}>#{tile}</Text>
@@ -128,7 +129,7 @@ export function ClassBoardScreen() {
         {leaderboard.map((m, idx) => (
           <Card
             key={m.userId}
-            style={[styles.leaderCard, m.userId === 'local-user' && { borderColor: accent }]}
+            style={[styles.leaderCard, m.userId === 'local-user' ? { borderColor: accent } : undefined]}
             padding={14}
           >
             <View style={styles.leaderRow}>
