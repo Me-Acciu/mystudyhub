@@ -1,0 +1,33 @@
+# Dipendenze e Build
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sicurezza: mai versionare segreti o file locali con credenziali
+.env
+.env*.local
+.env.production
+*.pem
+*.keystore
+
+# Build nativi e TypeScript
+ios/
+android/
+*.tsbuildinfo
+coverage/
+
+# Sistema Operativo ed Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Documentazione e file temporanei
+docs/
+*.docx

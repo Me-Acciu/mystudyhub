@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "MyStudyHub",
+    "slug": "mystudyhub",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "mystudyhub",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mystudyhub.app"
+    },
+    "android": {
+      "package": "com.mystudyhub.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F172A"
+      }
+    },
+    "plugins": ["expo-secure-store"],
+    "extra": {
+      "eas": { "projectId": "REPLACE_WITH_EAS_PROJECT_ID" }
+    }
+  }
+}
