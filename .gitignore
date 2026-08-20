@@ -10,7 +10,6 @@ yarn-error.log*
 
 # Sicurezza: mai versionare segreti o file locali con credenziali
 .env
-.env.example
 .env*.local
 .env.production
 *.pem
