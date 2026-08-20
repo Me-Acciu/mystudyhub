@@ -12,7 +12,7 @@
  * ---------------------------------------------------------------------------
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -21,24 +21,38 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BrainCircuit, RotateCcw, ChevronLeft, ChevronRight, Sparkles, HelpCircle, CheckCircle2, Award } from 'lucide-react-native';
+import { BrainCircuit, ChevronLeft, Sparkles, HelpCircle, Award } from 'lucide-react-native';
 
 import { useStudyStore } from '@/store/useStudyStore';
+import type { Chapter, Flashcard, FlashcardDeck } from '@/types/models';
+import { useDecksForChapter, useFlashcardsForDeck } from '@/features/flashcards/hooks/useFlashcards';
+import { useChapters } from '@/features/chapters/hooks/useChapters';
 import { Card } from '@/components/ui/Card';
 import { AppButton } from '@/components/ui/AppButton';
 
 export function FlashcardsScreen() {
-  const { decks, flashcards, chapters, updateFlashcardSM2, saveActivityResult } = useStudyStore();
+  const { chapters: chapterSeed, updateFlashcardSM2, saveActivityResult } = useStudyStore();
+  const { data: chapters = [] as Chapter[] } = useChapters(undefined);
+  const chapterList: Chapter[] = chapters.length > 0 ? chapters : chapterSeed;
+  const firstChapterId = chapterList[0]?.id ?? null;
+  const { data: decks = [] as FlashcardDeck[] } = useDecksForChapter(firstChapterId ?? '');
+  const { data: flashcards = [] as Flashcard[] } = useFlashcardsForDeck((decks[0]?.id) ?? '');
 
-  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(decks[0]?.id ?? null);
+  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [goodCount, setGoodCount] = useState(0);
 
-  const activeDeck = decks.find((d) => d.id === selectedDeckId);
-  const activeChapter = chapters.find((c) => c.id === activeDeck?.chapterId);
-  const deckCards = selectedDeckId ? flashcards.filter((f) => f.deckId === selectedDeckId) : [];
+  useEffect(() => {
+    if (decks.length > 0 && !selectedDeckId) {
+      setSelectedDeckId(decks[0].id);
+    }
+  }, [decks, selectedDeckId]);
+
+  const activeDeck = decks.find((d: FlashcardDeck) => d.id === selectedDeckId);
+  const activeChapter = chapterList.find((c: Chapter) => c.id === activeDeck?.chapterId);
+  const deckCards: Flashcard[] = selectedDeckId ? flashcards.filter((f: Flashcard) => f.deckId === selectedDeckId) : [];
   const currentCard = deckCards[currentIndex];
 
   const accent = '#8B5CF6'; // Violet accent per le flashcards
@@ -86,7 +100,7 @@ export function FlashcardsScreen() {
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.title}>Modulo Flashcards</Text>
-            <Text style={styles.subtitle}>Ripasso attivo & Algoritmo SM-2</Text>
+            <Text style={styles.subtitle}>{activeChapter ? `Capitolo: ${activeChapter.name}` : 'Ripasso attivo & Algoritmo SM-2'}</Text>
           </View>
           <View style={[styles.headerIcon, { backgroundColor: '#2e1065' }]}>
             <BrainCircuit color={accent} size={22} />
@@ -96,10 +110,10 @@ export function FlashcardsScreen() {
         {/* Deck selector */}
         <Text style={styles.sectionLabel}>Seleziona Mazzo</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.deckScroll} contentContainerStyle={styles.deckList}>
-          {decks.map((deck) => {
+          {decks.map((deck: FlashcardDeck) => {
             const isSelected = deck.id === selectedDeckId;
-            const chap = chapters.find((c) => c.id === deck.chapterId);
-            const count = flashcards.filter((f) => f.deckId === deck.id).length;
+            const chap = chapterList.find((c: Chapter) => c.id === deck.chapterId);
+            const count = flashcards.filter((f: Flashcard) => f.deckId === deck.id).length;
 
             return (
               <TouchableOpacity

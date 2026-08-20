@@ -18,16 +18,17 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Zap, BrainCircuit, Clock, FileText, Award, Edit3, X, Check } from 'lucide-react-native';
+import { ArrowLeft, BrainCircuit, Clock, FileText, Award, Edit3, X } from 'lucide-react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { useStudyStore, formatPartialDate } from '@/store/useStudyStore';
 import { useThemeStore } from '@/store/useThemeStore';
-import { useChapter } from '@/features/chapters/hooks/useChapters';
+import { useChapter, useUpdateChapter } from '@/features/chapters/hooks/useChapters';
 import { useSubjects } from '@/features/subjects/hooks/useSubjects';
 import { Card } from '@/components/ui/Card';
 import { AppButton } from '@/components/ui/AppButton';
 import type { SubjectsStackParamList } from '@/navigation/MainTabNavigator';
+import type { Subject } from '@/types/models';
 
 type Props = NativeStackScreenProps<SubjectsStackParamList, 'ChapterDetail'>;
 
@@ -35,7 +36,8 @@ export function ChapterDetailScreen({ route, navigation }: Props) {
   const { chapterId } = route.params;
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
   const { data: subjectsData } = useSubjects();
-  const subjects = subjectsData ?? [];
+  const subjects = (subjectsData ?? []) as Subject[];
+  const updateChapterMutation = useUpdateChapter();
   const { preferences } = useThemeStore();
 
   const accent = preferences.accentTheme === 'indigo'
@@ -44,13 +46,20 @@ export function ChapterDetailScreen({ route, navigation }: Props) {
     ? '#10B981'
     : '#F59E0B';
 
-  // Local UI state for notes editor; set when chapter loads or when modal opens
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [notesText, setNotesText] = useState('');
 
   useEffect(() => {
     if (chapter) setNotesText(chapter.notes ?? '');
   }, [chapter]);
+
+  if (chapterLoading) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <Text style={styles.notFound}>Caricamento capitolo…</Text>
+      </SafeAreaView>
+    );
+  }
 
   if (!chapter) {
     return (
@@ -60,19 +69,17 @@ export function ChapterDetailScreen({ route, navigation }: Props) {
     );
   }
 
-  const subject = subjects.find((s) => s.id === chapter.subjectId);
-  // Read remaining data from the local store until those features are migrated.
-  const { decks, flashcards, timelineEvents, updateChapterNotes } = useStudyStore.getState();
-  const events = timelineEvents.filter((e) => e.chapterId === chapterId);
-  const deck = decks.find((d) => d.chapterId === chapterId);
-  const cards = deck ? flashcards.filter((f) => f.deckId === deck.id) : [];
+  const subject = subjects.find((s: Subject) => s.id === chapter.subjectId);
+  const { decks, flashcards, timelineEvents } = useStudyStore.getState();
+  const events = timelineEvents.filter((e: { chapterId: string }) => e.chapterId === chapterId);
+  const deck = decks.find((d: { chapterId: string }) => d.chapterId === chapterId);
+  const cards = deck ? flashcards.filter((f: { deckId: string }) => f.deckId === deck.id) : [];
 
-  // Calcolo Percentuale di Padronanza Capitolo (Sezione 6.1 design doc)
   const consolidatedCards = cards.filter((c) => c.srState === 'consolidata').length;
   const masteryPercentage = cards.length > 0 ? Math.round((consolidatedCards / cards.length) * 100) : 50;
 
   function handleSaveNotes() {
-    updateChapterNotes(chapterId, notesText);
+    updateChapterMutation.mutate({ id: chapterId, notes: notesText });
     setShowNotesModal(false);
   }
 

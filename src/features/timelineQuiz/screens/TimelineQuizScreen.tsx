@@ -27,11 +27,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, RotateCcw, Trophy, CheckCircle2, XCircle } from 'lucide-react-native';
+import { ArrowLeft, Trophy, CheckCircle2, XCircle } from 'lucide-react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { useStudyStore, formatPartialDate } from '@/store/useStudyStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import type { TimelineEvent } from '@/types/models';
+import { useTimelineEvents } from '@/features/timelineQuiz/hooks/useTimelineEvents';
 import { Card } from '@/components/ui/Card';
 import { AppButton } from '@/components/ui/AppButton';
 import type { SubjectsStackParamList } from '@/navigation/MainTabNavigator';
@@ -87,7 +89,8 @@ function buildQuestions(events: ReturnType<typeof useStudyStore.getState>['timel
 
 export function TimelineQuizScreen({ route, navigation }: Props) {
   const { chapter } = route.params;
-  const { timelineEvents, saveActivityResult } = useStudyStore();
+  const { timelineEvents: seedTimelineEvents, saveActivityResult } = useStudyStore();
+  const { data: fetchedTimelineEvents = [] } = useTimelineEvents(chapter.id);
   const { preferences } = useThemeStore();
 
   const accent = preferences.accentTheme === 'indigo'
@@ -96,7 +99,7 @@ export function TimelineQuizScreen({ route, navigation }: Props) {
     ? '#10B981'
     : '#F59E0B';
 
-  const events = timelineEvents.filter((e) => e.chapterId === chapter.id);
+  const events: TimelineEvent[] = (fetchedTimelineEvents.length > 0 ? fetchedTimelineEvents : seedTimelineEvents).filter((e: TimelineEvent) => e.chapterId === chapter.id);
   const [questions] = useState<QuizQuestion[]>(() => buildQuestions(events));
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);

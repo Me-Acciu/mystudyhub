@@ -1,3 +1,7 @@
+declare const Deno: {
+  serve: (handler: (req: Request) => Promise<Response> | Response) => void;
+};
+
 // Header CORS standard senza bisogno di import esterni
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

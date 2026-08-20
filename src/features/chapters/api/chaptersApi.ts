@@ -56,6 +56,43 @@ export async function fetchChapterById(chapterId: string): Promise<Chapter> {
   return mapChapterRow(data as ChapterRow);
 }
 
+/** Update a chapter's persisted fields. */
+export async function updateChapter(params: {
+  id: string;
+  name?: string;
+  status?: Chapter['status'];
+  notes?: string | null;
+}): Promise<Chapter> {
+  const patch: Record<string, string | number | null> = {};
+
+  if (params.name !== undefined) {
+    const cleanName = sanitizeFreeText(params.name, TEXT_FIELD_LIMITS.chapterName);
+    if (!isNonEmptyName(cleanName)) {
+      throw new Error('Il nome del capitolo non può essere vuoto.');
+    }
+    patch.name = cleanName;
+  }
+
+  if (params.status !== undefined) {
+    patch.status = params.status;
+  }
+
+  if (params.notes !== undefined) {
+    const cleanNotes = params.notes === null ? null : sanitizeFreeText(params.notes, TEXT_FIELD_LIMITS.noteText);
+    patch.notes = cleanNotes;
+  }
+
+  const { data, error } = await supabase
+    .from('chapters')
+    .update(patch)
+    .eq('id', params.id)
+    .select('id, subject_id, name, "order", status, notes')
+    .single();
+
+  if (error) throw new Error('Impossibile aggiornare il capitolo. Riprova più tardi.');
+  return mapChapterRow(data as ChapterRow);
+}
+
 /** Create a new chapter appended to a subject. */
 export async function createChapter(params: { subjectId: string; name: string; order: number }): Promise<Chapter> {
   const cleanName = sanitizeFreeText(params.name, TEXT_FIELD_LIMITS.chapterName);
