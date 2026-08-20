@@ -29,7 +29,6 @@ Thumbs.db
 .idea/
 *.swp
 
-# Documentazione e file temporanei
+# Documentazione
 docs/
 *.docx
-.env.example
