@@ -22,6 +22,14 @@ export function useChapters(subjectId: string | undefined) {
   });
 }
 
+export function useChapter(chapterId: string | undefined) {
+  return useQuery({
+    queryKey: ['chapters', chapterId ?? ''] as const,
+    queryFn: () => fetchChapterById(chapterId as string),
+    enabled: Boolean(chapterId),
+  });
+}
+
 export function useCreateChapter(subjectId: string) {
   const queryClient = useQueryClient();
   return useMutation({

@@ -44,6 +44,18 @@ export async function fetchChapters(subjectId: string): Promise<Chapter[]> {
   return (data as ChapterRow[]).map(mapChapterRow);
 }
 
+/** Fetch a single chapter by its id. */
+export async function fetchChapterById(chapterId: string): Promise<Chapter> {
+  const { data, error } = await supabase
+    .from('chapters')
+    .select('id, subject_id, name, "order", status, notes')
+    .eq('id', chapterId)
+    .single();
+
+  if (error) throw new Error('Impossibile caricare il capitolo. Riprova più tardi.');
+  return mapChapterRow(data as ChapterRow);
+}
+
 /** Create a new chapter appended to a subject. */
 export async function createChapter(params: { subjectId: string; name: string; order: number }): Promise<Chapter> {
   const cleanName = sanitizeFreeText(params.name, TEXT_FIELD_LIMITS.chapterName);

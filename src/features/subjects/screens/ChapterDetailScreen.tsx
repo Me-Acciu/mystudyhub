@@ -7,7 +7,7 @@
  * ---------------------------------------------------------------------------
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { useStudyStore, formatPartialDate } from '@/store/useStudyStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useChapter } from '@/features/chapters/hooks/useChapters';
+import { useSubjects } from '@/features/subjects/hooks/useSubjects';
 import { Card } from '@/components/ui/Card';
 import { AppButton } from '@/components/ui/AppButton';
 import type { SubjectsStackParamList } from '@/navigation/MainTabNavigator';
@@ -31,7 +33,9 @@ type Props = NativeStackScreenProps<SubjectsStackParamList, 'ChapterDetail'>;
 
 export function ChapterDetailScreen({ route, navigation }: Props) {
   const { chapterId } = route.params;
-  const { chapters, subjects, timelineEvents, flashcards, decks, updateChapterNotes } = useStudyStore();
+  const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
+  const { data: subjectsData } = useSubjects();
+  const subjects = subjectsData ?? [];
   const { preferences } = useThemeStore();
 
   const accent = preferences.accentTheme === 'indigo'
@@ -40,9 +44,13 @@ export function ChapterDetailScreen({ route, navigation }: Props) {
     ? '#10B981'
     : '#F59E0B';
 
-  const chapter = chapters.find((c) => c.id === chapterId);
+  // Local UI state for notes editor; set when chapter loads or when modal opens
   const [showNotesModal, setShowNotesModal] = useState(false);
-  const [notesText, setNotesText] = useState(chapter?.notes ?? '');
+  const [notesText, setNotesText] = useState('');
+
+  useEffect(() => {
+    if (chapter) setNotesText(chapter.notes ?? '');
+  }, [chapter]);
 
   if (!chapter) {
     return (
@@ -53,6 +61,8 @@ export function ChapterDetailScreen({ route, navigation }: Props) {
   }
 
   const subject = subjects.find((s) => s.id === chapter.subjectId);
+  // Read remaining data from the local store until those features are migrated.
+  const { decks, flashcards, timelineEvents, updateChapterNotes } = useStudyStore.getState();
   const events = timelineEvents.filter((e) => e.chapterId === chapterId);
   const deck = decks.find((d) => d.chapterId === chapterId);
   const cards = deck ? flashcards.filter((f) => f.deckId === deck.id) : [];
